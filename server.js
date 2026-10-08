@@ -3,48 +3,83 @@ import express from "express";
 import OpenAI from "openai";
 
 const app = express();
-app.use(express.json());
+
+app.use(express.json({ limit: "20kb" }));
 app.use(express.static("public"));
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: "AI Builder server is running" });
+  res.json({ status: "ok", service: "AI Builder Machine" });
 });
 
 app.post("/api/build", async (req, res) => {
   try {
-    if (!process.env.OPENAI_API_KEY) {
+    const token = process.env.HF_TOKEN;
+
+    if (!token) {
       return res.status(500).json({
-        error: "The AI API key has not been configured yet."
+        error: "HF_TOKEN is missing. Add it in Render Environment."
+      });
+    }
+
+    const prompt = String(req.body?.prompt || "").trim();
+
+    if (!prompt) {
+      return res.status(400).json({
+        error: "Describe what you want to build."
+      });
+    }
+
+    if (prompt.length > 3000) {
+      return res.status(400).json({
+        error: "Please keep your request under 3000 characters."
       });
     }
 
     const client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
+      baseURL: "https://router.huggingface.co/v1",
+      apiKey: token
     });
 
-    const prompt = String(req.body.prompt || "").slice(0, 4000);
+    const result = await client.chat.completions.create({
+      model: "openai/gpt-oss-120b:cheapest",
+      messages: [
+        {
+          role: "system",
+          content: `You are AI Builder Machine, an expert in Minecraft Bedrock Edition,
+redstone, structures, command blocks, and addons.
 
-    if (!prompt.trim()) {
-      return res.status(400).json({ error: "Enter a build request." });
-    }
-
-    const response = await client.responses.create({
-      model: "gpt-4.1-mini",
-      instructions:
-        "You are AI Builder Machine for Minecraft Bedrock. Turn the user's request into a clear Minecraft building plan. Include dimensions, materials, coordinates relative to a starting point, and redstone components if requested. Be honest if a mechanism needs testing. Return a readable plan, not claims that blocks have already been placed.",
-      input: prompt
+Help the user build whatever they describe.
+Give a materials list and numbered, practical building instructions.
+For redstone, explain every connection and input/output.
+For large structures, explain dimensions and layers.
+For addon requests, explain the required behavior-pack and resource-pack files.
+Never claim that you placed blocks in the game or tested a build.
+Explain Bedrock limitations honestly.
+Use simple language suitable for a beginner on iPad.`
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      max_tokens: 1200
     });
 
-    res.json({ plan: response.output_text });
+    res.json({
+      result: result.choices[0]?.message?.content ||
+        "The AI returned an empty response."
+    });
   } catch (error) {
-    console.error("Build request failed:", error.message);
+    console.error("Hugging Face request failed:", error.message);
+
     res.status(500).json({
-      error: "The AI request failed. Check the server logs and API settings."
+      error: "AI request failed. Check your Hugging Face token, available credits, and Render logs."
     });
   }
 });
 
 const port = process.env.PORT || 3000;
+
 app.listen(port, "0.0.0.0", () => {
-  console.log(`AI Builder server listening on port ${port}`);
+  console.log(`AI Builder Machine running on port ${port}`);
 });
