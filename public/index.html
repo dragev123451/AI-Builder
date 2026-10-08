@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Builder Machine</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #111827;
+      color: white;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    h1 { color: #a3e635; }
+    textarea, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      font: inherit;
+    }
+    textarea {
+      min-height: 130px;
+      background: #1f2937;
+      color: white;
+      border: 1px solid #4b5563;
+    }
+    button {
+      margin-top: 12px;
+      background: #a3e635;
+      color: #172000;
+      border: 0;
+      font-weight: bold;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: #1f2937;
+      padding: 16px;
+      border-radius: 10px;
+    }
+    #status { color: #d1d5db; }
+  </style>
+</head>
+<body>
+  <h1>🧱 AI Builder Machine</h1>
+  <p>Describe anything you want to build in Minecraft Bedrock.</p>
+
+  <textarea id="prompt" placeholder="Example: Build a modern house with a redstone door"></textarea>
+  <button id="build">Generate building plan</button>
+  <p id="status"></p>
+  <pre id="result">Your building plan will appear here.</pre>
+
+  <script>
+    const button = document.getElementById("build");
+    const promptBox = document.getElementById("prompt");
+    const status = document.getElementById("status");
+    const result = document.getElementById("result");
+
+    button.addEventListener("click", async () => {
+      const prompt = promptBox.value.trim();
+
+      if (!prompt) {
+        status.textContent = "Type what you want to build first.";
+        return;
+      }
+
+      button.disabled = true;
+      status.textContent = "AI is creating your plan...";
+      result.textContent = "";
+
+      try {
+        const response = await fetch("/api/build", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Request failed.");
+        }
+
+        result.textContent = data.plan;
+        status.textContent = "Your plan is ready!";
+      } catch (error) {
+        status.textContent = "Could not generate the plan.";
+        result.textContent = error.message +
+          "\nCheck that the server is deployed and the API key is configured.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
