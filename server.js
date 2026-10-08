@@ -21,7 +21,7 @@ app.post("/api/build", async (req, res) => {
 
     if (!token) {
       return res.status(500).json({
-        error: "HF_TOKEN is missing. Add it in Render Environment."
+        error: "HF_TOKEN is missing in Render Environment."
       });
     }
 
@@ -29,13 +29,13 @@ app.post("/api/build", async (req, res) => {
 
     if (!prompt) {
       return res.status(400).json({
-        error: "Please describe what you want to build."
+        error: "Describe what you want to build."
       });
     }
 
     if (prompt.length > 3000) {
       return res.status(400).json({
-        error: "Your request is too long. Use fewer than 3000 characters."
+        error: "Keep your request under 3000 characters."
       });
     }
 
@@ -55,19 +55,19 @@ app.post("/api/build", async (req, res) => {
           role: "system",
           content: `You are AI Builder Machine, an expert in Minecraft Bedrock Edition.
 
-Help users create Minecraft builds, redstone machines, structures,
-command block systems, and behavior/resource pack addons.
+Help users design builds, redstone machines, structures, command blocks,
+and behavior/resource pack addons.
 
-For every request:
-1. Explain what the build does.
-2. List the required materials.
-3. Give numbered building instructions.
-4. Explain redstone connections and inputs/outputs.
-5. Explain dimensions and block placement where relevant.
-6. For addons, provide the needed files and explain where they go.
-7. Be honest about Bedrock limitations.
-8. Never claim you placed blocks in Minecraft or tested a build.
-9. Use simple language suitable for an iPad user.`
+For each request:
+- Explain what the build does.
+- List required materials.
+- Give numbered building instructions.
+- Explain redstone connections and inputs/outputs.
+- Explain dimensions and block placement.
+- For addons, describe the necessary files and their contents.
+- Use simple language suitable for a beginner on iPad.
+- Be honest about Bedrock limitations.
+- Never claim you placed blocks in Minecraft automatically.`
         },
         {
           role: "user",
@@ -98,16 +98,19 @@ For every request:
     let message = error.message || "Unknown AI error.";
 
     if (error.status === 401) {
-      message = "Authentication failed. Check your HF_TOKEN in Render and make sure it has Inference Providers permission.";
+      message = "Authentication failed. Check your Hugging Face token and its Inference Providers permission.";
     } else if (error.status === 403) {
-      message = "Access denied. Check your Hugging Face token permissions and model access.";
+      message = "Access denied. Check token permissions and model access.";
     } else if (error.status === 429) {
-      message = "Hugging Face rate limit or credits limit reached. Check your free usage allowance.";
+      message = "Rate limit or free credits limit reached. Check your Hugging Face usage.";
     } else if (error.status === 404) {
-      message = "The selected model or provider was not found. Check Hugging Face model availability.";
+      message = "Model or provider not found. The selected model may be unavailable.";
     } else if (error.status === 503) {
-      message = "The model or provider is temporarily unavailable. Try again later.";
-    } else if (error.code === "ETIMEDOUT" || error.code === "ECONNABORTED") {
+      message = "The model is temporarily unavailable. Try again later.";
+    } else if (
+      error.code === "ETIMEDOUT" ||
+      error.code === "ECONNABORTED"
+    ) {
       message = "Hugging Face timed out. Try again later.";
     }
 
