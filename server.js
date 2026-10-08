@@ -8,6 +8,38 @@ app.use(express.static("public"));
 
 const plans = [
   {
+    keywords: [
+      "secret redstone piston door",
+      "secret piston door",
+      "hidden piston door",
+      "hidden redstone door",
+      "secret entrance",
+      "secret door"
+    ],
+    title: "Secret Redstone Piston Door",
+    materials: [
+      "2 sticky pistons",
+      "2 solid blocks matching your wall",
+      "Redstone dust",
+      "1 lever or hidden redstone input",
+      "Building blocks for the wall",
+      "Optional painting or decoration"
+    ],
+    steps: [
+      "Choose a wall where you want a 1-block-wide, 2-block-high secret entrance.",
+      "Leave a 1x2 opening for the doorway.",
+      "Make a hidden 1-block-deep cavity immediately to one side of the doorway.",
+      "Place 2 sticky pistons vertically, one above the other, facing toward the doorway from the side cavity.",
+      "Place 2 matching solid blocks in front of the pistons so they can be pushed into the doorway when the pistons extend.",
+      "Connect both pistons to the same redstone control. Route the wiring behind the wall and keep it out of sight.",
+      "Add a hidden lever, button, or other redstone input in a nearby concealed location.",
+      "Test the circuit: powering the pistons should push the blocks into the doorway and close it. Turning the power off should retract the blocks and reopen the entrance.",
+      "Cover the wiring and piston cavity with wall blocks, leaving the moving blocks free to travel.",
+      "Decorate the wall to hide the entrance. Make sure no decorative blocks obstruct the moving blocks."
+    ],
+    note: "This is a basic design concept. The exact piston positions and wiring depend on the wall layout. Test the mechanism before covering it."
+  },
+  {
     keywords: ["house", "home", "starter base"],
     title: "Simple Minecraft House",
     materials: [
@@ -30,21 +62,19 @@ const plans = [
     ]
   },
   {
-    keywords: ["redstone door", "automatic door", "secret door"],
+    keywords: ["redstone door", "automatic door"],
     title: "Basic Redstone Door",
     materials: [
       "2 iron doors",
       "4 stone buttons",
-      "Redstone dust",
       "Building blocks"
     ],
     steps: [
       "Make a two-block-wide doorway.",
-      "Place one iron door in each doorway space.",
-      "Place a stone button on the wall outside.",
-      "Place another button on the inside wall.",
-      "For a simple button-operated door, position each button beside its door so it powers the door directly.",
-      "Test each button. Iron doors close automatically after their short powered opening."
+      "Place an iron door in each doorway space.",
+      "Place buttons beside the doors.",
+      "Test each button to confirm the doors open.",
+      "Iron doors close when their redstone power turns off."
     ]
   },
   {
@@ -67,7 +97,7 @@ const plans = [
     ]
   },
   {
-    keywords: ["piston", "piston door", "redstone machine"],
+    keywords: ["piston", "piston machine"],
     title: "Piston Machine Starter",
     materials: [
       "Sticky pistons",
@@ -76,12 +106,12 @@ const plans = [
       "Building blocks"
     ],
     steps: [
-      "Choose the block you want the piston to move.",
+      "Choose a block you want a piston to move.",
       "Place a sticky piston facing that block.",
       "Put a lever on a nearby solid block.",
       "Connect the lever to the piston with redstone dust.",
       "Activate the lever and check that the piston moves.",
-      "If it does not work, check the piston direction and the redstone connection."
+      "Check the piston direction and wiring if it does not work."
     ]
   }
 ];
@@ -96,10 +126,15 @@ function createPlan(prompt) {
   if (!plan) {
     return {
       result:
-        "AI Builder Machine (offline mode)\n\n" +
-        "I don't have a built-in template for that request yet.\n\n" +
-        "Try asking for a house, redstone door, wheat farm, or piston machine.\n\n" +
-        "No API key or paid AI service is used."
+        "AI Builder Machine — Offline Mode\n\n" +
+        "I don't have a matching template for that request yet.\n\n" +
+        "Try one of these:\n" +
+        "- Build a house\n" +
+        "- Make a secret redstone piston door\n" +
+        "- Make a redstone door\n" +
+        "- Create a wheat farm\n" +
+        "- Make a piston machine\n\n" +
+        "No online AI API or paid credits are used."
     };
   }
 
@@ -112,7 +147,8 @@ function createPlan(prompt) {
       plan.steps.map((item, index) =>
         (index + 1) + ". " + item
       ).join("\n") +
-      "\n\nOffline mode: this plan was generated from a built-in template."
+      (plan.note ? "\n\nIMPORTANT\n" + plan.note : "") +
+      "\n\nOffline mode: built-in template."
   };
 }
 
