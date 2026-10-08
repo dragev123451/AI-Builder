@@ -70,7 +70,7 @@ Use simple language suitable for a beginner on iPad.`
         "The AI returned an empty response."
     });
   } catch (error) {
-    console.error("Hugging Face request failed:", error.message);
+    console.error("Hugging Face error:", error);
 
     res.status(500).json({
       error: "AI request failed. Check your Hugging Face token, available credits, and Render logs."
